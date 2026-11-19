@@ -10,7 +10,7 @@
     "prettier:check": "prettier --check ./src",
     "prettier:format": "prettier --write \"**/*.{js,jsx,css,ts,tsx}\"",
     "typescript:check": "npx tsc --project ./tsconfig.json",
-    "prepare": "husky install",
+    "prepare": "node -e \"try { if (!process.env.CI) require('child_process').execSync('husky install') } catch (e) {}\"",
     "shad": "npx shadcn-ui@latest add"
   },
   "dependencies": {
