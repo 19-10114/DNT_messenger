@@ -46,8 +46,8 @@ Para permitir una evaluación exhaustiva de los roles comerciales, control de ac
 
 ### Paso 1: Clonar e Instalar Dependencias
 ```bash
-git clone https://github.com/<tu-usuario>/dnt-messenger-satellite.git
-cd dnt-messenger-satellite/backend
+git clone https://github.com/19-10114/DNT_messenger.git
+cd DNT_messenger/backend
 python -m venv .venv
 
 # En Windows:
