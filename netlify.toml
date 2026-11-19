@@ -6,4 +6,5 @@
   package = "@netlify/plugin-nextjs"
 
 [build.environment]
+  PNPM_FLAGS = "--no-frozen-lockfile"
   NEXT_PUBLIC_API_URL = "https://dnt-messenger.onrender.com/api"
