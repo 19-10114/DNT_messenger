@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DNT Messenger | Módulo Satélite de Mensajería Interna</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 h-screen flex flex-col overflow-hidden">
+
+  <!-- TOP HEADER -->
+  <header class="bg-slate-900 text-white border-b border-slate-800 px-4 py-2.5 flex items-center justify-between shadow-md shrink-0">
+    <div class="flex items-center space-x-3">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center font-bold text-white shadow-inner tracking-wider text-sm">
+        DNT
+      </div>
+      <div>
+        <div class="flex items-center space-x-2">
+          <h1 class="text-sm font-semibold tracking-tight text-white">DNT Messenger Satellite</h1>
+          <span class="text-[10px] bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 px-1.5 py-0.5 rounded font-mono font-medium">Sprint 1</span>
+          <span class="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.5 rounded font-mono">17 Tests OK</span>
+        </div>
+        <p class="text-[11px] text-slate-400">Entorno Aislado para Coevaluación de Pruebas (USB PS-1115)</p>
+      </div>
+    </div>
+
+    <!-- Active User & Session Switcher -->
+    <div class="flex items-center space-x-3">
+      <!-- Evaluator Switcher Dropdown -->
+      <div class="relative flex items-center space-x-2 bg-slate-800/80 px-2.5 py-1.5 rounded-lg border border-slate-700">
+        <label for="evaluatorSelect" class="text-xs text-slate-400 font-medium whitespace-nowrap">Sesión Activa:</label>
+        <select id="evaluatorSelect" onchange="switchSession(this.value)" class="bg-slate-900 text-white text-xs font-semibold rounded px-2 py-1 border border-slate-600 focus:outline-none focus:ring-1 focus:ring-cyan-500 cursor-pointer">
+          <option value="stefano">Stefano Casale (Admin - Sede Principal)</option>
+          <option value="daniela">Daniela Gragirena (Manager - Sede Este)</option>
+          <option value="torbet">Torbet (Manager - Sede Principal)</option>
+          <option value="samuel">Samuel (Seller - Sede Este)</option>
+          <option value="nadheska">Nadheska (Admin - Sede Oeste)</option>
+          <option value="ernesto">Ernesto (Mechanic - Sede Principal)</option>
+          <option value="gabriel">Gabriel (Seller - Sede Principal)</option>
+          <option value="nazareth">Nazareth (Mechanic - Sede Oeste)</option>
+        </select>
+      </div>
+
+      <!-- Quick Guide Button -->
+      <button onclick="toggleGuideModal()" class="text-xs bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-cyan-500/40 px-3 py-1.5 rounded-lg font-medium transition flex items-center space-x-1.5">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span>Guía de Evaluación</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- QUICK USER PILLS TOOLBAR (1-CLICK SWITCHER) -->
+  <div class="bg-slate-800/90 text-xs px-4 py-1.5 border-b border-slate-700/80 flex items-center space-x-2 overflow-x-auto shrink-0">
+    <span class="text-slate-400 font-medium whitespace-nowrap">Cambio rápido en 1 clic:</span>
+    <div id="quickUserPills" class="flex items-center space-x-1.5 overflow-x-auto py-0.5">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
+  <!-- MAIN APP CONTAINER -->
+  <div class="flex-1 flex overflow-hidden p-3 gap-3">
+    
+    <!-- LEFT COLUMN: SIDEBAR -->
+    <div class="w-80 md:w-96 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col shrink-0 overflow-hidden">
+      
+      <!-- Current User Profile Card -->
+      <div class="p-3 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+        <div class="flex items-center space-x-2.5 overflow-hidden">
+          <div id="currentAvatar" class="w-10 h-10 rounded-full bg-cyan-600 text-white font-bold flex items-center justify-center text-sm shadow-sm shrink-0">
+            SC
+          </div>
+          <div class="truncate">
+            <div id="currentFullName" class="text-xs font-bold text-slate-800 truncate">Stefano Casale</div>
+            <div class="flex items-center space-x-1 text-[11px] text-slate-500">
+              <span id="currentRoleBadge" class="bg-blue-100 text-blue-700 font-semibold px-1.5 py-0.2 rounded text-[10px]">Admin</span>
+              <span>•</span>
+              <span id="currentBranchBadge" class="truncate font-medium text-slate-600">Sede Principal</span>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center space-x-1">
+          <button onclick="openNewDirectModal()" title="Nuevo Chat Directo" class="p-1.5 text-slate-500 hover:text-cyan-600 hover:bg-slate-200/60 rounded-lg transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+          </button>
+          <button id="btnNewGroup" onclick="openNewGroupModal()" title="Crear Sala Grupal" class="p-1.5 text-slate-500 hover:text-cyan-600 hover:bg-slate-200/60 rounded-lg transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Search & Branch Filter -->
+      <div class="p-2.5 border-b border-slate-100 space-y-2">
+        <div class="relative">
+          <input id="searchConvInput" oninput="filterConversations()" type="text" placeholder="Buscar conversación..." class="w-full text-xs pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500">
+          <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </div>
+        <div class="flex items-center space-x-1 text-[11px] overflow-x-auto pb-0.5">
+          <button onclick="setBranchFilter('all')" class="branch-filter-btn px-2 py-0.5 rounded-full font-medium bg-slate-900 text-white" data-filter="all">Todas</button>
+          <button onclick="setBranchFilter('1')" class="branch-filter-btn px-2 py-0.5 rounded-full font-medium bg-slate-100 text-slate-600 hover:bg-slate-200" data-filter="1">Principal</button>
+          <button onclick="setBranchFilter('2')" class="branch-filter-btn px-2 py-0.5 rounded-full font-medium bg-slate-100 text-slate-600 hover:bg-slate-200" data-filter="2">Este</button>
+          <button onclick="setBranchFilter('3')" class="branch-filter-btn px-2 py-0.5 rounded-full font-medium bg-slate-100 text-slate-600 hover:bg-slate-200" data-filter="3">Oeste</button>
+        </div>
+      </div>
+
+      <!-- Conversations List -->
+      <div id="conversationsContainer" class="flex-1 overflow-y-auto divide-y divide-slate-100">
+        <!-- Rendered by JS -->
+        <div class="p-4 text-center text-xs text-slate-400">Cargando conversaciones...</div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN: CHAT WINDOW -->
+    <div class="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
+      
+      <!-- Chat Header -->
+      <div id="chatHeader" class="p-3 border-b border-slate-100 bg-white flex items-center justify-between shrink-0">
+        <div class="flex items-center space-x-3 overflow-hidden">
+          <div id="activeChatAvatar" class="w-10 h-10 rounded-full bg-slate-200 text-slate-600 font-bold flex items-center justify-center text-sm shrink-0">
+            💬
+          </div>
+          <div class="truncate">
+            <h2 id="activeChatTitle" class="text-sm font-bold text-slate-900 truncate">Selecciona una conversación</h2>
+            <p id="activeChatSubtitle" class="text-[11px] text-slate-500 truncate">Elige un chat de la lista o inicia una nueva conversación directa</p>
+          </div>
+        </div>
+        <div id="activeChatBadge" class="shrink-0 text-xs"></div>
+      </div>
+
+      <!-- Messages Body -->
+      <div id="messagesContainer" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/50">
+        <div class="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400">
+          <div class="w-16 h-16 rounded-2xl bg-cyan-50 text-cyan-600 flex items-center justify-center mb-3 text-2xl shadow-inner">
+            ✉️
+          </div>
+          <h3 class="text-sm font-semibold text-slate-700">Canal de Mensajería Interna</h3>
+          <p class="text-xs max-w-sm mt-1">Selecciona una conversación para revisar el historial cronológico y enviar mensajes con persistencia inmediata.</p>
+        </div>
+      </div>
+
+      <!-- Message Input Bar -->
+      <div id="chatInputBar" class="p-3 border-t border-slate-100 bg-white shrink-0 hidden">
+        <form onsubmit="handleSendMessage(event)" class="flex flex-col space-y-1.5">
+          <div class="flex items-center space-x-2">
+            <input id="messageInput" type="text" maxlength="4000" placeholder="Escribe un mensaje interno... (Enter para enviar)" class="flex-1 text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-cyan-500 text-slate-800" autocomplete="off">
+            <button type="submit" id="btnSend" class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2.5 rounded-lg text-xs font-semibold shadow-sm transition flex items-center space-x-1.5 shrink-0">
+              <span>Enviar</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+            </button>
+          </div>
+          <div class="flex justify-between items-center text-[10px] text-slate-400 px-1">
+            <span>Presiona <kbd class="bg-slate-100 px-1 rounded text-slate-600 font-mono">Enter</kbd> para enviar</span>
+            <span id="charCounter">0 / 4000</span>
+          </div>
+        </form>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- MODAL: NUEVO CHAT DIRECTO -->
+  <div id="modalNewDirect" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden border border-slate-100">
+      <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+        <div>
+          <h3 class="text-sm font-bold text-slate-900">Iniciar Conversación Directa</h3>
+          <p class="text-[11px] text-slate-500">Selecciona un empleado de la empresa</p>
+        </div>
+        <button onclick="closeNewDirectModal()" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
+      </div>
+      <div class="p-3 border-b border-slate-100">
+        <input id="searchEmpInput" oninput="filterEmployeeList()" type="text" placeholder="Buscar por nombre, cargo o sede..." class="w-full text-xs px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500">
+      </div>
+      <div id="employeesListContainer" class="max-h-72 overflow-y-auto divide-y divide-slate-100 p-2">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NUEVA SALA GRUPAL -->
+  <div id="modalNewGroup" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden border border-slate-100">
+      <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+        <div>
+          <h3 class="text-sm font-bold text-slate-900">Crear Sala Grupal</h3>
+          <p class="text-[11px] text-slate-500">Solo administradores y gerentes tienen autorización</p>
+        </div>
+        <button onclick="closeNewGroupModal()" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
+      </div>
+      <form onsubmit="handleCreateGroup(event)" class="p-4 space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Nombre de la Sala Grupal</label>
+          <input id="groupNameInput" type="text" required maxlength="150" placeholder="Ej. Equipo Taller y Repuestos" class="w-full text-xs px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Seleccionar Participantes:</label>
+          <div id="groupMembersCheckboxes" class="max-h-48 overflow-y-auto border border-slate-200 rounded-lg p-2 space-y-1.5 bg-slate-50/50">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+        <div id="groupErrorMsg" class="text-xs text-rose-600 hidden font-medium"></div>
+        <div class="pt-2 flex justify-end space-x-2">
+          <button type="button" onclick="closeNewGroupModal()" class="text-xs px-3 py-1.5 text-slate-600 hover:bg-slate-100 rounded-lg font-medium">Cancelar</button>
+          <button type="submit" class="text-xs px-4 py-1.5 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg font-semibold shadow-sm">Crear Grupo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: GUÍA DE EVALUACIÓN Y CREDENCIALES -->
+  <div id="modalGuide" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl overflow-hidden border border-slate-100 flex flex-col max-h-[90vh]">
+      <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-900 text-white shrink-0">
+        <div class="flex items-center space-x-2">
+          <span class="text-lg">📋</span>
+          <h3 class="text-sm font-bold">Guía de Coevaluación | Laboratorio 6 (USB PS-1115)</h3>
+        </div>
+        <button onclick="toggleGuideModal()" class="text-slate-400 hover:text-white p-1">✕</button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-5 text-xs text-slate-700 leading-relaxed">
+        
+        <!-- Credenciales -->
+        <div>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-cyan-800 bg-cyan-50 p-1.5 rounded border border-cyan-100 mb-2">
+            1. Tabla de Sesiones y Credenciales Preconfiguradas
+          </h4>
+          <p class="mb-2 text-slate-600">Todas las cuentas comparten la contraseña universal: <code class="font-mono font-bold bg-slate-100 px-1.5 py-0.5 rounded text-cyan-700">Password2026!</code></p>
+          <div class="overflow-x-auto border border-slate-200 rounded-lg">
+            <table class="w-full text-left text-[11px]">
+              <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
+                <tr>
+                  <th class="p-2">Usuario</th>
+                  <th class="p-2">Nombre Completo</th>
+                  <th class="p-2">Rol Comercial</th>
+                  <th class="p-2">Sede</th>
+                  <th class="p-2">Permiso Grupo</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 font-mono">
+                <tr class="bg-blue-50/30"><td class="p-2 font-bold text-slate-900">torbet</td><td class="p-2 font-sans">Torbet Evaluador</td><td class="p-2 text-blue-700 font-sans">manager</td><td class="p-2 font-sans">Sede Principal</td><td class="p-2 font-sans text-emerald-600">✓ Autorizado</td></tr>
+                <tr><td class="p-2 font-bold text-slate-900">samuel</td><td class="p-2 font-sans">Samuel Evaluador</td><td class="p-2 text-slate-700 font-sans">seller</td><td class="p-2 font-sans">Sede Este</td><td class="p-2 font-sans text-rose-500">✗ Denegado (403)</td></tr>
+                <tr class="bg-blue-50/30"><td class="p-2 font-bold text-slate-900">nadheska</td><td class="p-2 font-sans">Nadheska Evaluadora</td><td class="p-2 text-purple-700 font-sans">admin</td><td class="p-2 font-sans">Sede Oeste</td><td class="p-2 font-sans text-emerald-600">✓ Autorizado</td></tr>
+                <tr><td class="p-2 font-bold text-slate-900">ernesto</td><td class="p-2 font-sans">Ernesto Evaluador</td><td class="p-2 text-amber-700 font-sans">mechanic</td><td class="p-2 font-sans">Sede Principal</td><td class="p-2 font-sans text-rose-500">✗ Denegado (403)</td></tr>
+                <tr class="bg-blue-50/30"><td class="p-2 font-bold text-slate-900">stefano</td><td class="p-2 font-sans">Stefano Casale</td><td class="p-2 text-purple-700 font-sans">admin</td><td class="p-2 font-sans">Sede Principal</td><td class="p-2 font-sans text-emerald-600">✓ Autorizado</td></tr>
+                <tr><td class="p-2 font-bold text-slate-900">daniela</td><td class="p-2 font-sans">Daniela Gragirena</td><td class="p-2 text-blue-700 font-sans">manager</td><td class="p-2 font-sans">Sede Este</td><td class="p-2 font-sans text-emerald-600">✓ Autorizado</td></tr>
+                <tr class="bg-blue-50/30"><td class="p-2 font-bold text-slate-900">gabriel</td><td class="p-2 font-sans">Gabriel Orejarena</td><td class="p-2 text-slate-700 font-sans">seller</td><td class="p-2 font-sans">Sede Principal</td><td class="p-2 font-sans text-rose-500">✗ Denegado (403)</td></tr>
+                <tr><td class="p-2 font-bold text-slate-900">nazareth</td><td class="p-2 font-sans">Nazareth Colmenares</td><td class="p-2 text-amber-700 font-sans">mechanic</td><td class="p-2 font-sans">Sede Oeste</td><td class="p-2 font-sans text-rose-500">✗ Denegado (403)</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Ejecución de Pruebas -->
+        <div>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 bg-slate-100 p-1.5 rounded border border-slate-200 mb-2">
+            2. Comandos para Ejecución de Pruebas Automatizadas
+          </h4>
+          <div class="space-y-2">
+            <div>
+              <p class="font-medium text-slate-700 mb-1">A) Ejecutar la suite completa (17 pruebas automatizadas):</p>
+              <pre class="bg-slate-900 text-cyan-300 p-2.5 rounded font-mono text-[11px] overflow-x-auto">python manage.py test messenger</pre>
+            </div>
+            <div>
+              <p class="font-medium text-slate-700 mb-1">B) Medir cobertura de código (reporta ≥ 93% en messenger):</p>
+              <pre class="bg-slate-900 text-cyan-300 p-2.5 rounded font-mono text-[11px] overflow-x-auto">coverage run --source="messenger" manage.py test messenger
+coverage report</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inyección de Defecto Deliberado -->
+        <div>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-amber-800 bg-amber-50 p-1.5 rounded border border-amber-200 mb-2">
+            3. Instrucciones para Inyección de Defecto Deliberado (Tabla 5 Rúbrica)
+          </h4>
+          <p class="text-slate-600 mb-2">Para verificar que la suite de pruebas es estricta y falla ante regresiones deliberadas:</p>
+          <div class="space-y-2">
+            <div class="p-2.5 bg-amber-50/50 border border-amber-200/70 rounded">
+              <strong class="text-amber-900">Opción 1: Defecto en Pruebas Unitarias (CU-005):</strong>
+              <p class="mt-0.5 text-slate-600">En <code class="font-mono bg-white px-1 py-0.5 rounded border">backend/messenger/models.py</code>, dentro de la clase <code class="font-mono">ConversationMember</code>, agregue el método:</p>
+              <pre class="bg-slate-900 text-amber-300 p-2 rounded font-mono text-[11px] mt-1">def save(self, *args, **kwargs):
+    self.role = 'admin'
+    super().save(*args, **kwargs)</pre>
+              <p class="mt-1 text-[11px] text-slate-500">Ejecute <code class="font-mono">python manage.py test messenger</code>. El test unitario <code class="font-mono">test_conversation_member_role</code> fallará con <code class="font-mono">AssertionError: 'admin' != 'member'</code>.</p>
+            </div>
+
+            <div class="p-2.5 bg-amber-50/50 border border-amber-200/70 rounded">
+              <strong class="text-amber-900">Opción 2: Defecto en Pruebas de Integración (CI-007):</strong>
+              <p class="mt-0.5 text-slate-600">En <code class="font-mono bg-white px-1 py-0.5 rounded border">backend/messenger/views.py</code>, dentro de <code class="font-mono">GroupConversationCreateView.post</code>, comente la verificación de rol:</p>
+              <pre class="bg-slate-900 text-amber-300 p-2 rounded font-mono text-[11px] mt-1"># if not is_admin_or_manager and not request.user.is_staff:
+#     return get_failed_response(message='Solo administradores...', status_code=status.HTTP_403_FORBIDDEN)</pre>
+              <p class="mt-1 text-[11px] text-slate-500">Ejecute <code class="font-mono">python manage.py test messenger</code>. El test <code class="font-mono">test_create_group_forbidden_for_regular_user</code> fallará con <code class="font-mono">AssertionError: 201 != 403</code>.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="p-3 border-t border-slate-100 bg-slate-50 flex justify-end shrink-0">
+        <button onclick="toggleGuideModal()" class="px-4 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg shadow-sm">Entendido</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOGIC SCRIPT -->
+  <script>
+    // State
+    let currentUser = null;
+    let currentToken = null;
+    let evaluators = [];
+    let conversations = [];
+    let activeConversation = null;
+    let branchFilter = 'all';
+    let pollInterval = null;
+
+    const API_BASE = '/api';
+
+    // Init
+    window.addEventListener('DOMContentLoaded', async () => {
+      await loadEvaluators();
+      // Default to stefano
+      await switchSession('stefano');
+
+      // Bind char counter
+      document.getElementById('messageInput').addEventListener('input', (e) => {
+        document.getElementById('charCounter').textContent = `${e.target.value.length} / 4000`;
+      });
+    });
+
+    // Load preloaded evaluator list
+    async function loadEvaluators() {
+      try {
+        const res = await fetch(`${API_BASE}/auth/evaluators/`);
+        const json = await res.json();
+        evaluators = json.data || [];
+        renderQuickPills();
+      } catch (e) {
+        console.error('Error loading evaluators', e);
+      }
+    }
+
+    // Render Quick 1-click pills
+    function renderQuickPills() {
+      const container = document.getElementById('quickUserPills');
+      container.innerHTML = evaluators.map(u => {
+        const isActive = currentUser && currentUser.username === u.username;
+        const colorClass = isActive ? 'bg-cyan-600 text-white font-bold' : 'bg-slate-700/80 text-slate-300 hover:bg-slate-700';
+        return `
+          <button onclick="switchSession('${u.username}')" class="px-2 py-0.5 rounded text-[11px] transition whitespace-nowrap ${colorClass}">
+            ${u.firstName} (${u.role})
+          </button>
+        `;
+      }).join('');
+    }
+
+    // Switch Session
+    async function switchSession(username) {
+      try {
+        const res = await fetch(`${API_BASE}/auth/switch-session/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username })
+        });
+        const json = await res.json();
+        if (json.data && json.data.token) {
+          currentToken = json.data.token;
+          currentUser = json.data.user;
+          document.getElementById('evaluatorSelect').value = username;
+          updateHeaderProfile();
+          renderQuickPills();
+          activeConversation = null;
+          resetChatWindow();
+          await loadConversations();
+          startPolling();
+        }
+      } catch (e) {
+        alert('Error al alternar sesión: ' + e.message);
+      }
+    }
+
+    function updateHeaderProfile() {
+      if (!currentUser) return;
+      const initials = `${currentUser.firstName ? currentUser.firstName[0] : ''}${currentUser.lastName ? currentUser.lastName[0] : ''}`.toUpperCase() || currentUser.username.slice(0, 2).toUpperCase();
+      document.getElementById('currentAvatar').textContent = initials;
+      document.getElementById('currentFullName').textContent = `${currentUser.firstName} ${currentUser.lastName}`.trim() || currentUser.username;
+      
+      const roleElem = document.getElementById('currentRoleBadge');
+      roleElem.textContent = currentUser.role.toUpperCase();
+      if (['admin', 'manager', 'administrator'].includes(currentUser.role.toLowerCase())) {
+        roleElem.className = 'bg-emerald-100 text-emerald-800 font-semibold px-1.5 py-0.2 rounded text-[10px]';
+        document.getElementById('btnNewGroup').classList.remove('opacity-40', 'cursor-not-allowed');
+        document.getElementById('btnNewGroup').title = 'Crear Sala Grupal';
+      } else {
+        roleElem.className = 'bg-slate-100 text-slate-700 font-medium px-1.5 py-0.2 rounded text-[10px]';
+        document.getElementById('btnNewGroup').classList.add('opacity-40', 'cursor-not-allowed');
+        document.getElementById('btnNewGroup').title = 'Crear Sala Grupal (Requiere Admin o Manager)';
+      }
+
+      document.getElementById('currentBranchBadge').textContent = currentUser.branchName || 'Sede Principal';
+    }
+
+    // Load Conversations
+    async function loadConversations() {
+      if (!currentToken) return;
+      try {
+        const res = await fetch(`${API_BASE}/messenger/conversations/`, {
+          headers: { 'Authorization': `Token ${currentToken}` }
+        });
+        const json = await res.json();
+        conversations = json.data || [];
+        renderConversations();
+      } catch (e) {
+        console.error('Error fetching conversations', e);
+      }
+    }
+
+    // Filter conversations by branch and search
+    function filterConversations() {
+      renderConversations();
+    }
+
+    function setBranchFilter(filter) {
+      branchFilter = filter;
+      document.querySelectorAll('.branch-filter-btn').forEach(btn => {
+        if (btn.getAttribute('data-filter') === filter) {
+          btn.className = 'branch-filter-btn px-2 py-0.5 rounded-full font-medium bg-slate-900 text-white';
+        } else {
+          btn.className = 'branch-filter-btn px-2 py-0.5 rounded-full font-medium bg-slate-100 text-slate-600 hover:bg-slate-200';
+        }
+      });
+      renderConversations();
+    }
+
+    function renderConversations() {
+      const container = document.getElementById('conversationsContainer');
+      const search = document.getElementById('searchConvInput').value.toLowerCase().trim();
+
+      const filtered = conversations.filter(c => {
+        // Branch filter
+        if (branchFilter !== 'all') {
+          if (c.type === 'direct' && c.otherUser) {
+            if (String(c.otherUser.branchId) !== String(branchFilter)) return false;
+          }
+        }
+        // Search text
+        if (search) {
+          const name = (c.type === 'group' ? c.name : (c.otherUser ? `${c.otherUser.firstName} ${c.otherUser.lastName} ${c.otherUser.username}` : '')).toLowerCase();
+          const lastMsg = (c.lastMessage ? c.lastMessage.content : '').toLowerCase();
+          return name.includes(search) || lastMsg.includes(search);
+        }
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="p-6 text-center text-xs text-slate-400">
+            No hay conversaciones activas en este filtro.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(c => {
+        const isGroup = c.type === 'group';
+        const isSelected = activeConversation && activeConversation.id === c.id;
+        const title = isGroup ? c.name : (c.otherUser ? `${c.otherUser.firstName} ${c.otherUser.lastName}` : 'Usuario');
+        const roleDept = isGroup ? `${c.participantCount} participantes` : (c.otherUser ? `${c.otherUser.department || c.otherUser.role} • ${c.otherUser.branchName || 'Sede'}` : '');
+        const lastMsgText = c.lastMessage ? c.lastMessage.content : 'Sin mensajes aún';
+        const initials = isGroup ? '👥' : (c.otherUser ? `${c.otherUser.firstName ? c.otherUser.firstName[0] : ''}${c.otherUser.lastName ? c.otherUser.lastName[0] : ''}` : 'U');
+        
+        const bgClass = isSelected ? 'bg-cyan-50/70 border-l-4 border-cyan-600' : 'hover:bg-slate-50';
+
+        return `
+          <div onclick="selectConversation(${c.id})" class="p-3 cursor-pointer transition flex items-center space-x-3 ${bgClass}">
+            <div class="w-10 h-10 rounded-full ${isGroup ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-200 text-slate-700'} font-semibold flex items-center justify-center text-xs shrink-0">
+              ${initials}
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <h4 class="text-xs font-bold text-slate-900 truncate">${title}</h4>
+                <span class="text-[10px] text-slate-400 whitespace-nowrap">${formatTime(c.updatedAt)}</span>
+              </div>
+              <p class="text-[11px] text-slate-500 font-medium truncate">${roleDept}</p>
+              <p class="text-[11px] text-slate-400 truncate mt-0.5">${lastMsgText}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function selectConversation(convId) {
+      const conv = conversations.find(c => c.id === convId);
+      if (!conv) return;
+      activeConversation = conv;
+      renderConversations();
+      updateChatHeader();
+      document.getElementById('chatInputBar').classList.remove('hidden');
+      await loadMessages();
+      document.getElementById('messageInput').focus();
+    }
+
+    function resetChatWindow() {
+      document.getElementById('activeChatTitle').textContent = 'Selecciona una conversación';
+      document.getElementById('activeChatSubtitle').textContent = 'Elige un chat de la lista o inicia una nueva conversación directa';
+      document.getElementById('activeChatAvatar').textContent = '💬';
+      document.getElementById('activeChatBadge').innerHTML = '';
+      document.getElementById('chatInputBar').classList.add('hidden');
+      document.getElementById('messagesContainer').innerHTML = `
+        <div class="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400">
+          <div class="w-16 h-16 rounded-2xl bg-cyan-50 text-cyan-600 flex items-center justify-center mb-3 text-2xl shadow-inner">
+            ✉️
+          </div>
+          <h3 class="text-sm font-semibold text-slate-700">Canal de Mensajería Interna</h3>
+          <p class="text-xs max-w-sm mt-1">Selecciona una conversación para revisar el historial cronológico y enviar mensajes con persistencia inmediata.</p>
+        </div>
+      `;
+    }
+
+    function updateChatHeader() {
+      if (!activeConversation) return;
+      const isGroup = activeConversation.type === 'group';
+      const title = isGroup ? activeConversation.name : (activeConversation.otherUser ? `${activeConversation.otherUser.firstName} ${activeConversation.otherUser.lastName}` : 'Usuario');
+      const subtitle = isGroup ? `Sala Grupal Privada (${activeConversation.participantCount} miembros)` : (activeConversation.otherUser ? `${activeConversation.otherUser.department || activeConversation.otherUser.role} • ${activeConversation.otherUser.branchName || 'Sede'}` : '');
+      const initials = isGroup ? '👥' : (activeConversation.otherUser ? `${activeConversation.otherUser.firstName ? activeConversation.otherUser.firstName[0] : ''}${activeConversation.otherUser.lastName ? activeConversation.otherUser.lastName[0] : ''}` : 'U');
+
+      document.getElementById('activeChatTitle').textContent = title;
+      document.getElementById('activeChatSubtitle').textContent = subtitle;
+      document.getElementById('activeChatAvatar').textContent = initials;
+      document.getElementById('activeChatAvatar').className = `w-10 h-10 rounded-full ${isGroup ? 'bg-indigo-100 text-indigo-700' : 'bg-cyan-100 text-cyan-700'} font-bold flex items-center justify-center text-sm shrink-0`;
+      document.getElementById('activeChatBadge').innerHTML = isGroup ? '<span class="bg-indigo-100 text-indigo-700 text-[10px] px-2 py-0.5 rounded font-bold uppercase">Grupo</span>' : '<span class="bg-cyan-100 text-cyan-700 text-[10px] px-2 py-0.5 rounded font-bold uppercase">Directo</span>';
+    }
+
+    // Load Messages
+    async function loadMessages() {
+      if (!activeConversation || !currentToken) return;
+      try {
+        const res = await fetch(`${API_BASE}/messenger/conversations/${activeConversation.id}/messages/`, {
+          headers: { 'Authorization': `Token ${currentToken}` }
+        });
+        const json = await res.json();
+        const messages = json.data || [];
+        renderMessages(messages);
+      } catch (e) {
+        console.error('Error fetching messages', e);
+      }
+    }
+
+    function renderMessages(messages) {
+      const container = document.getElementById('messagesContainer');
+      if (messages.length === 0) {
+        container.innerHTML = `
+          <div class="h-full flex flex-col items-center justify-center text-center text-xs text-slate-400">
+            No hay mensajes en esta conversación. ¡Envía el primero!
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = messages.map(m => {
+        const isMine = currentUser && m.sender && m.sender.id === currentUser.id;
+        const senderName = isMine ? 'Tú' : (m.sender ? `${m.sender.firstName} ${m.sender.lastName}` : 'Usuario');
+        const roleBranch = m.sender ? `${m.sender.role} @ ${m.sender.branchName || 'Sede'}` : '';
+
+        return `
+          <div class="flex flex-col ${isMine ? 'items-end' : 'items-start'}">
+            <div class="flex items-center space-x-1.5 mb-1 px-1">
+              <span class="text-[10px] font-bold ${isMine ? 'text-cyan-800' : 'text-slate-700'}">${senderName}</span>
+              ${!isMine ? `<span class="text-[9px] bg-slate-200/80 text-slate-600 px-1 rounded font-mono">${roleBranch}</span>` : ''}
+              <span class="text-[9px] text-slate-400">${formatTime(m.createdAt)}</span>
+            </div>
+            <div class="max-w-md px-3.5 py-2 rounded-2xl text-xs leading-relaxed shadow-sm ${isMine ? 'bg-cyan-600 text-white rounded-tr-none' : 'bg-white text-slate-800 border border-slate-200 rounded-tl-none'}">
+              ${escapeHtml(m.content)}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.scrollTop = container.scrollHeight;
+    }
+
+    // Send Message
+    async function handleSendMessage(e) {
+      e.preventDefault();
+      const input = document.getElementById('messageInput');
+      const content = input.value.trim();
+      if (!content || !activeConversation || !currentToken) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/messenger/conversations/${activeConversation.id}/messages/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Token ${currentToken}`
+          },
+          body: JSON.stringify({ content })
+        });
+        const json = await res.json();
+        if (res.ok) {
+          input.value = '';
+          document.getElementById('charCounter').textContent = '0 / 4000';
+          await loadMessages();
+          await loadConversations();
+        } else {
+          alert(json.message || 'Error al enviar mensaje');
+        }
+      } catch (err) {
+        alert('Error de red al enviar mensaje');
+      }
+    }
+
+    // New Direct Chat Modal
+    function openNewDirectModal() {
+      document.getElementById('modalNewDirect').classList.remove('hidden');
+      renderEmployeeList();
+      document.getElementById('searchEmpInput').focus();
+    }
+
+    function closeNewDirectModal() {
+      document.getElementById('modalNewDirect').classList.add('hidden');
+    }
+
+    function filterEmployeeList() {
+      renderEmployeeList();
+    }
+
+    function renderEmployeeList() {
+      const container = document.getElementById('employeesListContainer');
+      const search = document.getElementById('searchEmpInput').value.toLowerCase().trim();
+
+      const candidates = evaluators.filter(u => {
+        if (currentUser && u.id === currentUser.id) return false;
+        if (search) {
+          const matchName = `${u.firstName} ${u.lastName} ${u.username}`.toLowerCase().includes(search);
+          const matchRole = (u.role || '').toLowerCase().includes(search);
+          const matchBranch = (u.branchName || '').toLowerCase().includes(search);
+          return matchName || matchRole || matchBranch;
+        }
+        return true;
+      });
+
+      if (candidates.length === 0) {
+        container.innerHTML = '<div class="p-4 text-center text-xs text-slate-400">No se encontraron empleados coincidentes.</div>';
+        return;
+      }
+
+      container.innerHTML = candidates.map(u => `
+        <div onclick="startDirectChat(${u.id})" class="p-2.5 hover:bg-slate-50 cursor-pointer rounded-lg flex items-center justify-between transition">
+          <div class="flex items-center space-x-2.5">
+            <div class="w-8 h-8 rounded-full bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-xs">
+              ${u.firstName[0]}${u.lastName[0]}
+            </div>
+            <div>
+              <div class="text-xs font-bold text-slate-800">${u.firstName} ${u.lastName}</div>
+              <div class="text-[10px] text-slate-500">${u.department || u.role} • ${u.branchName}</div>
+            </div>
+          </div>
+          <button class="text-[11px] bg-cyan-50 hover:bg-cyan-100 text-cyan-700 font-semibold px-2 py-1 rounded border border-cyan-200">
+            Chatear
+          </button>
+        </div>
+      `).join('');
+    }
+
+    async function startDirectChat(targetUserId) {
+      try {
+        const res = await fetch(`${API_BASE}/messenger/conversations/direct/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Token ${currentToken}`
+          },
+          body: JSON.stringify({ userId: targetUserId })
+        });
+        const json = await res.json();
+        if (res.ok) {
+          closeNewDirectModal();
+          await loadConversations();
+          selectConversation(json.data.id);
+        } else {
+          alert(json.message || 'No se pudo crear conversación directa');
+        }
+      } catch (e) {
+        alert('Error al iniciar conversación: ' + e.message);
+      }
+    }
+
+    // New Group Modal
+    function openNewGroupModal() {
+      const allowedRoles = ['admin', 'manager', 'administrator'];
+      if (!currentUser || !allowedRoles.includes(currentUser.role.toLowerCase())) {
+        alert('Acceso Denegado (403): Solo administradores y gerentes tienen autorización para crear salas grupales.');
+        return;
+      }
+      document.getElementById('modalNewGroup').classList.remove('hidden');
+      document.getElementById('groupErrorMsg').classList.add('hidden');
+      document.getElementById('groupNameInput').value = '';
+
+      const checkContainer = document.getElementById('groupMembersCheckboxes');
+      checkContainer.innerHTML = evaluators.filter(u => u.id !== currentUser.id).map(u => `
+        <label class="flex items-center space-x-2 p-1.5 hover:bg-white rounded cursor-pointer text-xs">
+          <input type="checkbox" value="${u.id}" class="group-member-cb rounded text-cyan-600 focus:ring-cyan-500">
+          <span class="font-medium text-slate-800">${u.firstName} ${u.lastName}</span>
+          <span class="text-[10px] text-slate-400">(${u.role} - ${u.branchName})</span>
+        </label>
+      `).join('');
+    }
+
+    function closeNewGroupModal() {
+      document.getElementById('modalNewGroup').classList.add('hidden');
+    }
+
+    async function handleCreateGroup(e) {
+      e.preventDefault();
+      const name = document.getElementById('groupNameInput').value.trim();
+      const checkedBoxes = Array.from(document.querySelectorAll('.group-member-cb:checked'));
+      const memberIds = checkedBoxes.map(cb => parseInt(cb.value));
+
+      if (memberIds.length === 0) {
+        const errElem = document.getElementById('groupErrorMsg');
+        errElem.textContent = 'Seleccione al menos un participante para la sala grupal.';
+        errElem.classList.remove('hidden');
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/messenger/conversations/group/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Token ${currentToken}`
+          },
+          body: JSON.stringify({ name, memberIds })
+        });
+        const json = await res.json();
+        if (res.ok) {
+          closeNewGroupModal();
+          await loadConversations();
+          selectConversation(json.data.id);
+        } else {
+          const errElem = document.getElementById('groupErrorMsg');
+          errElem.textContent = json.message || 'Error al crear la sala grupal';
+          errElem.classList.remove('hidden');
+        }
+      } catch (err) {
+        alert('Error al crear grupo: ' + err.message);
+      }
+    }
+
+    // Guide Modal
+    function toggleGuideModal() {
+      const modal = document.getElementById('modalGuide');
+      modal.classList.toggle('hidden');
+    }
+
+    // Polling messages every 2.5 seconds
+    function startPolling() {
+      if (pollInterval) clearInterval(pollInterval);
+      pollInterval = setInterval(async () => {
+        if (activeConversation && currentToken) {
+          await loadMessages();
+        }
+      }, 2500);
+    }
+
+    // Utilities
+    function formatTime(isoStr) {
+      if (!isoStr) return '';
+      const d = new Date(isoStr);
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+  </script>
+</body>
+</html>
