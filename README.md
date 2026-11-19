@@ -42,12 +42,18 @@ Para permitir una evaluación exhaustiva de los roles comerciales, control de ac
 
 ### Requisitos Previos
 - Python 3.10, 3.11 o 3.12 instalado.
-- Gestor de paquetes `pip`.
+- Python 3.10, 3.11 o 3.12 instalado con `pip`.
+- Node.js v18+ o v20+ con `npm` o `pnpm`.
 
-### Paso 1: Clonar e Instalar Dependencias
+### Paso 1: Clonar el Repositorio
 ```bash
 git clone https://github.com/19-10114/DNT_messenger.git
-cd DNT_messenger/backend
+cd DNT_messenger
+```
+
+### Paso 2: Iniciar el Backend (Django)
+```bash
+cd backend
 python -m venv .venv
 
 # En Windows:
@@ -56,28 +62,32 @@ python -m venv .venv
 # source .venv/bin/activate
 
 pip install -r requirements.txt
-```
-
-### Paso 2: Ejecutar Migraciones y Poblar Datos de Prueba
-```bash
 python manage.py migrate
 python manage.py seed_eval_data
-```
-*(Este comando asegura las 3 sedes, los 8 usuarios con credenciales y crea conversaciones de prueba iniciales).*
-
-### Paso 3: Iniciar el Servidor
-```bash
 python manage.py runserver
 ```
+*El backend quedará escuchando en `http://localhost:8000/api/` con la base de datos pre-poblada con las 8 cuentas y chats demostrativos.*
 
-### Paso 4: Abrir la Interfaz de Evaluación
+### Paso 3: Iniciar el Frontend Real (Next.js)
+En una nueva terminal:
+```bash
+cd DNT_messenger/frontend
+npm install
+npm run dev
+```
+
+### Paso 4: Abrir la Aplicación Web Oficial
 Abra su navegador web en:  
-👉 **`http://127.0.0.1:8000/`**
+👉 **`http://localhost:3001/`** (o `http://localhost:3000/`)
 
-**Características de la Interfaz:**
-- **Conmutador de Sesión en 1 Clic:** En la barra superior puede alternar instantáneamente entre `torbet`, `samuel`, `nadheska`, `ernesto`, `stefano`, `daniela`, `gabriel` y `nazareth` sin tener que volver a iniciar sesión.
-- **Canales Directos y Grupos:** Pruebe el envío bidireccional abriendo dos pestañas en simultáneo con usuarios distintos.
-- **Verificación de Reglas de Negocio:** Intente crear un grupo desde la sesión de `samuel` o `ernesto` (rol regular) para evidenciar la restricción de seguridad (HTTP 403 Forbidden).
+1. Haga clic en **"Iniciar Sesión"** en la barra superior de navegación.
+2. Ingrese con cualquiera de las **8 cuentas preconfiguradas** (ej. Usuario: `stefano`, `torbet`, `daniela` o `samuel` / Contraseña: `Password2026!`).
+3. Será redirigido directamente al módulo de mensajería interna en **`/dashboard/messenger`**, donde dispondrá de la experiencia completa, idéntica y oficial desarrollada durante el Sprint 1:
+   - Panel de conversaciones con filtro dinámico por sucursal.
+   - Apertura y gestión de chats directos 1 a 1 y salas grupales corporativas.
+   - Burbujas de mensajes con colapso suave de textos extensos.
+   - Barra superior con identificador de `Rol • Sucursal`.
+   - Control de permisos en creación de grupos (Solo Administradores y Gerentes).
 
 ---
 

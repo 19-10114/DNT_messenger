@@ -1,0 +1,34 @@
+.password-input-container {
+  position: relative;
+}
+
+.eye-icon img {
+  width: 16px;
+  height: 16px;
+}
+
+.eye-icon {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-55%);
+  cursor: pointer;
+}
+
+.white-input {
+  background-color: white;
+}
+
+.green-text {
+  color: rgb(2, 60, 1);
+}
+
+/* Ocultar scrollbar para las miniaturas de la galería */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}

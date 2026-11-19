@@ -1,0 +1,38 @@
+import { z } from 'zod';
+
+export const contractFormSchema = z.object({
+  director: z.string().min(1, 'El director es requerido'),
+  Cedula_director: z.string().min(1, 'La cédula del director es requerida'),
+  Rif_director: z.string().min(1, 'El RIF del director es requerido'),
+  nombre: z.string().min(1, 'El nombre es requerido'),
+  cedula: z.string().min(1, 'La cédula es requerida'),
+  Rif: z.string().min(1, 'El RIF es requerido'),
+  serial_motor: z.string().min(1, 'El serial del motor es requerido'),
+  placa: z.string().min(1, 'La placa es requerida'),
+  marca: z.string().min(1, 'La marca es requerida'),
+  modelo: z.string().min(1, 'El modelo es requerido'),
+  año: z.string().min(1, 'El año es requerido'),
+  imei: z.string().min(1, 'El IMEI es requerido'),
+  chip: z.string().min(1, 'El chip es requerido'),
+  telefono: z.string().min(1, 'El teléfono es requerido'),
+  canon: z.string().min(1, 'El canon es requerido'),
+  monto: z.string().min(1, 'El monto es requerido'),
+  Tipo: z.string().min(1, 'El tipo es requerido'),
+  pago_letra: z.string().min(1, 'El pago en letras es requerido'),
+  dias_contrato: z.string().min(1, 'Los días de contrato son requeridos'),
+  meses_escrito: z.string().min(1, 'Los meses escritos son requeridos'),
+  meses: z.string().min(1, 'Los meses son requeridos'),
+  desplazamiento: z.string().min(1, 'El desplazamiento es requerido'),
+  dolares: z.string().min(1, 'Los dólares son requeridos'),
+  Monto_escrito: z.string().min(1, 'El monto escrito es requerido'),
+  liquidar: z.string().min(1, 'El liquidar es requerido'),
+  inicial_letras: z.string().min(1, 'El inicial en letras es requerido'),
+  inicial: z.string().min(1, 'El inicial es requerido'),
+  correo_electronico: z.string().email('Correo electrónico inválido'),
+  fecha_firma_dia: z.string().min(1, 'El día de firma es requerido'),
+  fecha_firma_mes: z.string().min(1, 'El mes de firma es requerido'),
+  fecha_firma_ano: z.string().min(1, 'El año de firma es requerido'),
+  document: z.instanceof(File).optional(),
+});
+
+export type contractFormValues = z.infer<typeof contractFormSchema>;
