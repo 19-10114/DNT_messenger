@@ -146,7 +146,11 @@ const LandingNavBar = () => {
           description: `Bienvenido ${user.username}`,
         });
         const next = getNextPath();
-        if (next) router.replace(next);
+        if (next) {
+          router.replace(next);
+        } else {
+          router.push('/dashboard/messenger');
+        }
       }
     } catch (error: any) {
       setLoginError(error);
@@ -182,23 +186,7 @@ const LandingNavBar = () => {
   // Handler para ir al panel de usuario
   const goToPanel = () => {
     setUserMenuOpen(false);
-    if (user?.isSuperuser || user?.isStaff) {
-      if (
-        ['admin', 'manager', 'finance'].some((role) => roles.includes(role))
-      ) {
-        router.push('/dashboard');
-      } else if (roles.includes('seller')) {
-        router.push(DELIVERY_NOTES);
-      } else if (
-        ['storage', 'main_storage'].some((role) => roles.includes(role))
-      ) {
-        router.push(PARTS_INVENTORY);
-      } else {
-        router.push(ORDERS);
-      }
-    } else {
-      router.push('/landing');
-    }
+    router.push('/dashboard/messenger');
   };
 
   return (

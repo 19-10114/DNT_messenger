@@ -1,9 +1,13 @@
-import React from 'react';
+'use client';
 
-type Props = {};
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
-const LandingPage = (props: Props) => {
-  return <div>LandingPage</div>;
-};
+export default function LandingPage() {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace('/dashboard/messenger');
+  }, [router]);
 
-export default LandingPage;
+  return null;
+}

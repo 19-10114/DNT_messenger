@@ -128,7 +128,7 @@ class Command(BaseCommand):
                     'department': acc['department'],
                     'branch': branches_map[acc['branch_id']],
                     'document_id': acc['document_id'],
-                    'is_staff': True if acc['role'] in ['admin', 'manager'] else False,
+                    'is_staff': True,
                 }
             )
             user.set_password(DEFAULT_PASSWORD)
@@ -137,6 +137,7 @@ class Command(BaseCommand):
             user.branch = branches_map[acc['branch_id']]
             user.first_name = acc['first_name']
             user.last_name = acc['last_name']
+            user.is_staff = True
             user.save()
             token, _ = Token.objects.get_or_create(user=user)
             created_users[acc['username']] = user
