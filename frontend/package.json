@@ -75,6 +75,7 @@
     "zustand": "^4.5.5"
   },
   "devDependencies": {
+    "@netlify/plugin-nextjs": "^5.8.0",
     "@types/react-datepicker": "^4.19.6",
     "husky": "^8.0.3",
     "prettier": "^3.3.3"
